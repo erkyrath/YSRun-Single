@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp6.0</TargetFramework>
+    <RootNamespace>YSRunSingle</RootNamespace>
+    <UseAppHost>true</UseAppHost>
+    <PublishSelfContained>true</PublishSelfContained>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <PackageId>YSRunSingle</PackageId>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>ysrun</ToolCommandName>
+    <PackageOutputPath>../../nupkg</PackageOutputPath>
+    <!-- <YarnSpinnerDevelopmentPath>../../../YarnSpinner</YarnSpinnerDevelopmentPath> -->
+
+    <Authors>Secret Lab Pty. Ltd. and Yarn Spinner contributors</Authors>
+    <PackageDescription><![CDATA[A single-turn JSON wrapper for YarnSpinner.]]></PackageDescription>
+
+    <Company>Secret Lab Pty. Ltd.</Company>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ClosedXML" Version="0.95.4" />
+    <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.20253.1" />
+    <PackageReference Include="CsvHelper" Version="12.2.2" />
+  </ItemGroup>
+
+  <!-- If Yarn Spinner doesn't exist at YarnSpinnerDevelopmentPath, then pull
+    the most recent version from NuGet. -->
+  <ItemGroup Condition="!Exists('$(YarnSpinnerDevelopmentPath)')">
+    <PackageReference Include="YarnSpinner" Version="3.0.2" />
+  </ItemGroup>
+
+  <!-- If Yarn Spinner DOES exist at YarnSpinnerDevelopmentPath, use that. -->
+  <ItemGroup Condition="Exists('$(YarnSpinnerDevelopmentPath)')">
+    <ProjectReference Include="$(YarnSpinnerDevelopmentPath)/YarnSpinner/YarnSpinner.csproj" />
+  </ItemGroup>
+
+</Project>
