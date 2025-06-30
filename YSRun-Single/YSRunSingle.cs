@@ -35,8 +35,6 @@ namespace YSRunSingle
 
         public static void RunTurn(string gamefile, bool startgame)
         {
-            Console.WriteLine($"### running {gamefile}, start={startgame}");
-
             var settings = new Google.Protobuf.JsonParser.Settings(8);
             var jsonParser = new Google.Protobuf.JsonParser(settings);
 
@@ -44,7 +42,40 @@ namespace YSRunSingle
             var compilerOutput = jsonParser.Parse<Yarn.CompilerOutput>(infile);
             infile.Dispose();
 
-            
+            var storage = new Yarn.MemoryVariableStore();
+            var dialogue = new Yarn.Dialogue(storage);
+            var done = false;
+
+            dialogue.SetProgram(compilerOutput.Program);
+            dialogue.SetNode("Start");
+
+            string TextForLine(string lineID)
+            {
+                return compilerOutput.Strings[lineID].Text;
+            }
+
+            void LineHandler(Yarn.Line line)
+            {
+                Console.WriteLine(TextForLine(line.ID));
+            }
+
+            void OptionsHandler(Yarn.OptionSet options)
+            {
+                int count = 0;
+                foreach (var option in options.Options) {
+                    Console.WriteLine($"{count}: {TextForLine(option.Line.ID)}");
+                    count += 1;
+                }
+                done = true;
+            }
+
+            dialogue.LineHandler = LineHandler;
+            dialogue.OptionsHandler = OptionsHandler;
+
+            do {
+                dialogue.Continue();
+            }
+            while (dialogue.IsActive && !done);
         }
     }
 }
