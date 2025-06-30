@@ -44,7 +44,7 @@ namespace YSRunSingle
 
             var storage = new Yarn.MemoryVariableStore();
             var dialogue = new Yarn.Dialogue(storage);
-            var done = false;
+            var awaitinput = false;
 
             dialogue.SetProgram(compilerOutput.Program);
             dialogue.SetNode("Start");
@@ -66,7 +66,7 @@ namespace YSRunSingle
                     Console.WriteLine($"{count}: {TextForLine(option.Line.ID)}");
                     count += 1;
                 }
-                done = true;
+                awaitinput = true;
             }
 
             dialogue.LineHandler = LineHandler;
@@ -75,7 +75,7 @@ namespace YSRunSingle
             do {
                 dialogue.Continue();
             }
-            while (dialogue.IsActive && !done);
+            while (dialogue.IsActive && !awaitinput);
         }
     }
 }
