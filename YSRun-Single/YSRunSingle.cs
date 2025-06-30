@@ -20,16 +20,36 @@ namespace YSRunSingle
                 gamefile = val;
             }
             if (gamefile == null) {
-                Console.WriteLine("### No gamefile");
+                Console.WriteLine("You must supply a game filename");
                 return 1;
             }
-            RunTurn(gamefile, start);
+            try {
+                RunTurn(gamefile, start);
+            }
+            catch (Exception ex) {
+                Console.Error.WriteLine($"{ex.Message}");
+                return 1;
+            }
             return 0;
         }
 
         public static void RunTurn(string gamefile, bool startgame)
         {
             Console.WriteLine($"### running {gamefile}, start={startgame}");
+
+            var settings = new Google.Protobuf.JsonParser.Settings(8);
+            var jsonParser = new Google.Protobuf.JsonParser(settings);
+
+            StreamReader infile = File.OpenText(gamefile);
+            var res = jsonParser.Parse<Yarn.CompilerOutput>(infile);
+            infile.Dispose();
+
+            /*###
+            var compilerOutput = new Yarn.CompilerOutput();
+            var settings = new Google.Protobuf.JsonFormatter.Settings(true);
+            var jsonFormatter = new Google.Protobuf.JsonFormatter(settings);
+            ###*/
+            
         }
     }
 }
