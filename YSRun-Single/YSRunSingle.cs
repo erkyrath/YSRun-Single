@@ -41,14 +41,9 @@ namespace YSRunSingle
             var jsonParser = new Google.Protobuf.JsonParser(settings);
 
             StreamReader infile = File.OpenText(gamefile);
-            var res = jsonParser.Parse<Yarn.CompilerOutput>(infile);
+            var compilerOutput = jsonParser.Parse<Yarn.CompilerOutput>(infile);
             infile.Dispose();
 
-            /*###
-            var compilerOutput = new Yarn.CompilerOutput();
-            var settings = new Google.Protobuf.JsonFormatter.Settings(true);
-            var jsonFormatter = new Google.Protobuf.JsonFormatter(settings);
-            ###*/
             
         }
     }
