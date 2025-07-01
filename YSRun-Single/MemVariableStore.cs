@@ -131,7 +131,43 @@ namespace YSRunSingle
             Type typeToConvert,
             JsonSerializerOptions options) {
             var store = new MemVariableStore();
-            //###
+            
+            if (reader.TokenType != JsonTokenType.StartObject) {
+                throw new JsonException();
+            }
+            while (reader.Read()) {
+                if (reader.TokenType == JsonTokenType.EndObject) {
+                    break;
+                }
+
+                if (reader.TokenType != JsonTokenType.PropertyName) {
+                    throw new JsonException();
+                }
+
+                string? propName = reader.GetString();
+                if (propName == null) {
+                    throw new JsonException();
+                }
+                
+                reader.Read();
+                if (reader.TokenType == JsonTokenType.String) {
+                    string? val = reader.GetString();
+                    if (val != null) {
+                        store.SetValue(propName, val);
+                    }
+                }
+                else if (reader.TokenType == JsonTokenType.Number) {
+                    float val = reader.GetSingle();
+                    store.SetValue(propName, val);
+                }
+                else if (reader.TokenType == JsonTokenType.True) {
+                    store.SetValue(propName, true);
+                }
+                else if (reader.TokenType == JsonTokenType.False) {
+                    store.SetValue(propName, false);
+                }
+            }
+            
             return store;
         }
         
