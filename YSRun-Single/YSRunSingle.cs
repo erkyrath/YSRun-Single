@@ -105,17 +105,45 @@ namespace YSRunSingle
             }
             while (dialogue.IsActive && !awaitinput);
 
+            if (!awaitinput) {
+                //###
+            }
+
             if (true) {
                 //### depretty
                 var joptions = new JsonWriterOptions { Indented = true };
                 string json = runstate.JsonWriteAutosave(dialogue, joptions);
                 File.WriteAllText("autosave.json", json+"\n");
             }
+
+            GenerateOutput(dialogue, runstate);
+        }
+
+        internal static void GenerateOutput(Yarn.Dialogue dialogue, RunState runstate)
+        {
+            var output = new System.Text.Json.Nodes.JsonObject {
+                ["type"] = "update",
+                ["gen"] = runstate.gen,
+            };
+
+            //### depretty
+            var options = new JsonSerializerOptions { WriteIndented = true };
+            Console.WriteLine(output.ToJsonString(options));
         }
     }
 
     internal struct RunState
     {
+        public RunState() {}
+        
+        public int gen = 0;
+        public int game_turn = 0;
+        public bool has_metrics = false;
+        public float metrics_width = 0;
+        public float metrics_height = 0;
+        public bool newinput = false;
+        public bool newturn = false;
+        
         public void JsonReadAutosave(Yarn.Dialogue dialogue, string json, JsonReaderOptions joptions)
         {
             var options = new JsonSerializerOptions { };
@@ -138,7 +166,21 @@ namespace YSRunSingle
                 string? propName = reader.GetString();
                 reader.Read();
                 
-                if (propName == "Storage") {
+                if (propName == "Turn") {
+                    game_turn = reader.GetInt32();
+                }
+                else if (propName == "Gen") {
+                    gen = reader.GetInt32();
+                }
+                else if (propName == "MetricsWidth") {
+                    metrics_width = reader.GetSingle();
+                    has_metrics = true;
+                }
+                else if (propName == "Metricsheight") {
+                    metrics_height = reader.GetSingle();
+                    has_metrics = true;
+                }
+                else if (propName == "Storage") {
                     var storageconv = new MemVariableStoreConverter();
                     var storage = storageconv.Read(ref reader, typeof(MemVariableStore), options);
                     dialogue.SetStorage(storage);
@@ -166,6 +208,14 @@ namespace YSRunSingle
             using var writer = new Utf8JsonWriter(stream, joptions);
 
             writer.WriteStartObject();
+
+            writer.WriteNumber("Turn", game_turn);
+            writer.WriteNumber("Gen", gen);
+
+            if (has_metrics) {
+                writer.WriteNumber("MetricsWidth", metrics_width);
+                writer.WriteNumber("MetricsHeight", metrics_height);
+            }
             
             var storageconv = new MemVariableStoreConverter();
             writer.WritePropertyName("Storage");
