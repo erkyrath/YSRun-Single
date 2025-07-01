@@ -11,7 +11,7 @@
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>ysrun</ToolCommandName>
     <PackageOutputPath>../../nupkg</PackageOutputPath>
-    <!-- <YarnSpinnerDevelopmentPath>../../../YarnSpinner</YarnSpinnerDevelopmentPath> -->
+    <YarnSpinnerDevelopmentPath>../YarnSpinner</YarnSpinnerDevelopmentPath>
 
     <Authors>Secret Lab Pty. Ltd. and Yarn Spinner contributors</Authors>
     <PackageDescription><![CDATA[A single-turn JSON wrapper for YarnSpinner.]]></PackageDescription>
