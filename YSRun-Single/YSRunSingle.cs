@@ -46,6 +46,7 @@ namespace YSRunSingle
             var dialogue = new Yarn.Dialogue(storage);
             var awaitinput = false;
 
+            dialogue.LogErrorMessage = (val) => Console.Error.WriteLine(val);
             dialogue.SetProgram(compilerOutput.Program);
             dialogue.SetNode("Start");
 
