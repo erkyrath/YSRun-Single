@@ -130,6 +130,8 @@ namespace YSRunSingle
                 }
 
                 string? propName = reader.GetString();
+                reader.Read();
+                
                 if (propName == "Storage") {
                     var storageconv = new MemVariableStoreConverter();
                     autosave.Storage = storageconv.Read(ref reader, typeof(MemVariableStore), options);
