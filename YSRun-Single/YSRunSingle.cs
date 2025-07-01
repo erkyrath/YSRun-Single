@@ -50,7 +50,8 @@ namespace YSRunSingle
             if (!startgame) {
                 var joptions = new JsonSerializerOptions { WriteIndented = true };
                 string json = File.ReadAllText("autosave.json");
-                storage = JsonSerializer.Deserialize<MemVariableStore>(json, joptions);
+                var autosave = JsonSerializer.Deserialize<AutosaveStruct>(json, joptions);
+                storage = autosave.Storage;
             }
 
             dialogue.LogErrorMessage = (val) => Console.Error.WriteLine(val);
@@ -87,11 +88,19 @@ namespace YSRunSingle
             while (dialogue.IsActive && !awaitinput);
 
             if (true) {
+                var autosave = new AutosaveStruct {
+                    Storage = storage,
+                };
                 //### depretty
                 var joptions = new JsonSerializerOptions { WriteIndented = true };
-                string json = JsonSerializer.Serialize<MemVariableStore>(storage, joptions);
-                File.WriteAllText("autosave.json", json);
+                string json = JsonSerializer.Serialize<AutosaveStruct>(autosave, joptions);
+                File.WriteAllText("autosave.json", json+"\n");
             }
         }
+    }
+
+    internal struct AutosaveStruct
+    {
+        public MemVariableStore Storage { get; set; }
     }
 }
