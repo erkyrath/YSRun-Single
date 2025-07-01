@@ -69,15 +69,19 @@ namespace YSRunSingle
             if (startgame) {
                 dialogue.SetNode("Start");
             }
+            else {
+                dialogue.SetSelectedOption(0); //###
+            }
 
-            string TextForLine(string lineID)
+            string TextForLine(string lineID, string[] subs)
             {
-                return compilerOutput.Strings[lineID].Text;
+                string text = compilerOutput.Strings[lineID].Text;
+                return String.Format(text, subs);
             }
 
             void LineHandler(Yarn.Line line)
             {
-                Console.WriteLine(TextForLine(line.ID));
+                Console.WriteLine(TextForLine(line.ID, line.Substitutions));
             }
 
             void OptionsHandler(Yarn.OptionSet options)
@@ -85,7 +89,7 @@ namespace YSRunSingle
                 int count = 0;
                 foreach (var option in options.Options) {
                     var availstr = option.IsAvailable ? "" : " (unavailable)";
-                    Console.WriteLine($"{count}:{availstr} {TextForLine(option.Line.ID)}");
+                    Console.WriteLine($"{count}:{availstr} {TextForLine(option.Line.ID, option.Line.Substitutions)}");
                     count += 1;
                 }
                 awaitinput = true;
