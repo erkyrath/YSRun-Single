@@ -37,13 +37,21 @@ namespace YSRunSingle
             var settings = new Google.Protobuf.JsonParser.Settings(8);
             var jsonParser = new Google.Protobuf.JsonParser(settings);
 
-            StreamReader infile = File.OpenText(gamefile);
-            var compilerOutput = jsonParser.Parse<Yarn.CompilerOutput>(infile);
-            infile.Dispose();
+            Yarn.CompilerOutput compilerOutput = null;
+            
+            using (StreamReader infile = File.OpenText(gamefile)) {
+                compilerOutput = jsonParser.Parse<Yarn.CompilerOutput>(infile);
+            }
 
             var storage = new MemVariableStore();
             var dialogue = new Yarn.Dialogue(storage);
             var awaitinput = false;
+
+            if (!startgame) {
+                var joptions = new JsonSerializerOptions { WriteIndented = true };
+                string json = File.ReadAllText("autosave.json");
+                storage = JsonSerializer.Deserialize<MemVariableStore>(json, joptions);
+            }
 
             dialogue.LogErrorMessage = (val) => Console.Error.WriteLine(val);
             dialogue.SetProgram(compilerOutput.Program);
@@ -78,10 +86,12 @@ namespace YSRunSingle
             }
             while (dialogue.IsActive && !awaitinput);
 
-            //### depretty
-            var joptions = new JsonSerializerOptions { WriteIndented = true };
-            string json = JsonSerializer.Serialize(storage, joptions);
-            File.WriteAllText("autosave.json", json);
+            if (true) {
+                //### depretty
+                var joptions = new JsonSerializerOptions { WriteIndented = true };
+                string json = JsonSerializer.Serialize<MemVariableStore>(storage, joptions);
+                File.WriteAllText("autosave.json", json);
+            }
         }
     }
 }
