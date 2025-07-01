@@ -147,7 +147,7 @@ namespace YSRunSingle
                         throw new JsonException();
                     }
                     autosave.Dialogue = new Yarn.Dialogue(autosave.Storage);
-                    autosave.Dialogue.JsonReadState(reader, options);
+                    autosave.Dialogue.JsonReadState(ref reader, options);
                 }
                 else {
                     throw new JsonException();
