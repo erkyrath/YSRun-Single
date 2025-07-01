@@ -1,10 +1,9 @@
 using System;
 using System.IO;
+using System.Text.Json;
 
 namespace YSRunSingle
 {
-    using System;
-
     public class YSRunSingle
     {
         public static int Main(string[] args)
@@ -42,7 +41,7 @@ namespace YSRunSingle
             var compilerOutput = jsonParser.Parse<Yarn.CompilerOutput>(infile);
             infile.Dispose();
 
-            var storage = new Yarn.MemoryVariableStore();
+            var storage = new MemVariableStore();
             var dialogue = new Yarn.Dialogue(storage);
             var awaitinput = false;
 
@@ -78,6 +77,11 @@ namespace YSRunSingle
                 dialogue.Continue();
             }
             while (dialogue.IsActive && !awaitinput);
+
+            //### depretty
+            var joptions = new JsonSerializerOptions { WriteIndented = true };
+            string json = JsonSerializer.Serialize(storage, joptions);
+            File.WriteAllText("autosave.json", json);
         }
     }
 }
