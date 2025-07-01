@@ -63,7 +63,8 @@ namespace YSRunSingle
             {
                 int count = 0;
                 foreach (var option in options.Options) {
-                    Console.WriteLine($"{count}: {TextForLine(option.Line.ID)}");
+                    var availstr = option.IsAvailable ? "" : " (unavailable)";
+                    Console.WriteLine($"{count}:{availstr} {TextForLine(option.Line.ID)}");
                     count += 1;
                 }
                 awaitinput = true;
