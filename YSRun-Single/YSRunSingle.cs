@@ -46,17 +46,23 @@ namespace YSRunSingle
                 compilerOutput = jsonParser.Parse<Yarn.CompilerOutput>(infile);
             }
 
-            var storage = new MemVariableStore();
-            var dialogue = new Yarn.Dialogue(storage);
-            var awaitinput = false;
+            MemVariableStore storage;
+            Yarn.Dialogue dialogue;
 
-            if (!startgame) {
+            if (startgame) {
+                storage = new MemVariableStore();
+                dialogue = new Yarn.Dialogue(storage);
+            }
+            else {
                 var joptions = new JsonSerializerOptions { WriteIndented = true };
                 string json = File.ReadAllText("autosave.json");
                 var autosave = JsonSerializer.Deserialize<AutosaveStruct>(json, joptions);
                 storage = autosave.Storage;
+                dialogue = autosave.Dialogue;
             }
 
+            var awaitinput = false;
+            
             dialogue.LogErrorMessage = (val) => Console.Error.WriteLine(val);
             dialogue.SetProgram(compilerOutput.Program);
             dialogue.SetNode("Start");
@@ -135,6 +141,13 @@ namespace YSRunSingle
                 if (propName == "Storage") {
                     var storageconv = new MemVariableStoreConverter();
                     autosave.Storage = storageconv.Read(ref reader, typeof(MemVariableStore), options);
+                }
+                else if (propName == "State") {
+                    if (autosave.Storage == null) {
+                        throw new JsonException();
+                    }
+                    autosave.Dialogue = new Yarn.Dialogue(autosave.Storage);
+                    autosave.Dialogue.JsonReadState(reader, options);
                 }
                 else {
                     throw new JsonException();
