@@ -46,19 +46,21 @@ namespace YSRunSingle
                 compilerOutput = jsonParser.Parse<Yarn.CompilerOutput>(infile);
             }
 
-            MemVariableStore storage;
-            Yarn.Dialogue dialogue;
+            RunState runstate = new RunState();
+            MemVariableStore storage = new MemVariableStore();
+            Yarn.Dialogue dialogue = new Yarn.Dialogue(storage);
 
-            if (startgame) {
-                storage = new MemVariableStore();
-                dialogue = new Yarn.Dialogue(storage);
-            }
-            else {
-                var joptions = new JsonSerializerOptions { WriteIndented = true };
+            if (!startgame) {
+                var joptions = new JsonReaderOptions { };
                 string json = File.ReadAllText("autosave.json");
-                var autosave = JsonSerializer.Deserialize<AutosaveStruct>(json, joptions);
-                storage = autosave.Storage;
-                dialogue = autosave.Dialogue;
+                runstate.JsonReadAutosave(dialogue, json, joptions);
+                //###
+                if (true) {
+                    var jwoptions = new JsonWriterOptions { Indented = true };
+                    string json2 = runstate.JsonWriteAutosave(dialogue, jwoptions);
+                    File.WriteAllText("autosave-copy.json", json2+"\n");
+                }
+                //###
             }
 
             var awaitinput = false;
@@ -104,13 +106,9 @@ namespace YSRunSingle
             while (dialogue.IsActive && !awaitinput);
 
             if (true) {
-                var autosave = new AutosaveStruct {
-                    Storage = storage,
-                    Dialogue = dialogue,
-                };
                 //### depretty
-                var joptions = new JsonSerializerOptions { WriteIndented = true };
-                string json = JsonSerializer.Serialize<AutosaveStruct>(autosave, joptions);
+                var joptions = new JsonWriterOptions { Indented = true };
+                string json = runstate.JsonWriteAutosave(dialogue, joptions);
                 File.WriteAllText("autosave.json", json+"\n");
             }
         }
@@ -182,4 +180,71 @@ namespace YSRunSingle
             writer.WriteEndObject();
         }
     }
+
+    internal struct RunState
+    {
+        public void JsonReadAutosave(Yarn.Dialogue dialogue, string json, JsonReaderOptions joptions)
+        {
+            var options = new JsonSerializerOptions { };
+            
+            byte[] bytes = System.Text.Encoding.UTF8.GetBytes(json);
+            var reader = new Utf8JsonReader(bytes, joptions);
+
+            if (reader.TokenType != JsonTokenType.StartObject) {
+                throw new JsonException();
+            }
+            while (reader.Read()) {
+                if (reader.TokenType == JsonTokenType.EndObject) {
+                    break;
+                }
+                if (reader.TokenType != JsonTokenType.PropertyName) {
+                    throw new JsonException();
+                }
+
+                string? propName = reader.GetString();
+                reader.Read();
+                
+                if (propName == "Storage") {
+                    var storageconv = new MemVariableStoreConverter();
+                    var storage = storageconv.Read(ref reader, typeof(MemVariableStore), options);
+                    //###
+                }
+                else if (propName == "State") {
+                    dialogue.JsonReadState(ref reader, options);
+                }
+                else {
+                    throw new JsonException();
+                }
+                
+            }
+        }
+        
+        public string JsonWriteAutosave(Yarn.Dialogue dialogue, JsonWriterOptions joptions)
+        {
+            MemVariableStore? storage = dialogue.VariableStorage as MemVariableStore;
+            if (storage == null) {
+                throw new Exception("VariableStorage is not jsonable");
+            }
+            
+            var options = new JsonSerializerOptions { WriteIndented = joptions.Indented };
+            
+            using var stream = new MemoryStream();
+            using var writer = new Utf8JsonWriter(stream, joptions);
+
+            writer.WriteStartObject();
+            
+            var storageconv = new MemVariableStoreConverter();
+            writer.WritePropertyName("Storage");
+            storageconv.Write(writer, storage, options);
+            
+            writer.WritePropertyName("State");
+            dialogue.JsonWriteState(writer, options);
+                
+            writer.WriteEndObject();
+
+            writer.Flush();
+            string json = System.Text.Encoding.UTF8.GetString(stream.ToArray());
+            return json;
+        }
+    };
 }
