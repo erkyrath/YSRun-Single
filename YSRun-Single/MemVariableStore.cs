@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Yarn;
 
 namespace YSRunSingle
@@ -12,9 +14,10 @@ namespace YSRunSingle
     /// This is an adaptation of Yarn.MemoryVariableStore which permits
     /// JSON serialization.
     /// </summary>
+    [JsonConverter(typeof(MemVariableStoreConverter))]
     public class MemVariableStore : IVariableStorage
     {
-        private readonly Dictionary<string, object> variables = new Dictionary<string, object>();
+        internal readonly Dictionary<string, object> variables = new Dictionary<string, object>();
 
         private static bool TryGetAsType<T>(Dictionary<string, object> dictionary, string key, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out T? result)
         {
@@ -118,6 +121,40 @@ namespace YSRunSingle
             // Ask our Program about it. It will be able to tell if the variable
             // is stored, smart, or unknown.
             return this.Program.GetVariableKind(name);
+        }
+    }
+
+    public class MemVariableStoreConverter : JsonConverter<MemVariableStore>
+    {
+        public override MemVariableStore Read(
+            ref Utf8JsonReader reader,
+            Type typeToConvert,
+            JsonSerializerOptions options) {
+            var store = new MemVariableStore();
+            //###
+            return store;
+        }
+        
+        public override void Write(
+            Utf8JsonWriter writer,
+            MemVariableStore store,
+            JsonSerializerOptions options) {
+            writer.WriteStartObject();
+            foreach (var pair in store.variables) {
+                if (pair.Value.GetType() == typeof(bool)) {
+                    writer.WriteBoolean(pair.Key, (bool)pair.Value);
+                }
+                else if (pair.Value.GetType() == typeof(int)) {
+                    writer.WriteNumber(pair.Key, (int)pair.Value);
+                }
+                else if (pair.Value.GetType() == typeof(float)) {
+                    writer.WriteNumber(pair.Key, (float)pair.Value);
+                }
+                else if (pair.Value.GetType() == typeof(string)) {
+                    writer.WriteString(pair.Key, pair.Value as string);
+                }
+            }
+            writer.WriteEndObject();
         }
     }
 }
