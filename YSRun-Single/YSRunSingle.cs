@@ -65,7 +65,10 @@ namespace YSRunSingle
             
             dialogue.LogErrorMessage = (val) => Console.Error.WriteLine(val);
             dialogue.SetProgram(compilerOutput.Program);
-            dialogue.SetNode("Start");
+
+            if (startgame) {
+                dialogue.SetNode("Start");
+            }
 
             string TextForLine(string lineID)
             {
