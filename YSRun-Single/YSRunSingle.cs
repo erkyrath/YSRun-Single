@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace YSRunSingle
 {
@@ -90,6 +91,7 @@ namespace YSRunSingle
             if (true) {
                 var autosave = new AutosaveStruct {
                     Storage = storage,
+                    Dialogue = dialogue,
                 };
                 //### depretty
                 var joptions = new JsonSerializerOptions { WriteIndented = true };
@@ -99,8 +101,38 @@ namespace YSRunSingle
         }
     }
 
+    [JsonConverter(typeof(AutosaveStructConverter))]
     internal struct AutosaveStruct
     {
-        public MemVariableStore Storage { get; set; }
+        internal MemVariableStore Storage;
+        internal Yarn.Dialogue Dialogue;
+    }
+
+    internal class AutosaveStructConverter : JsonConverter<AutosaveStruct>
+    {
+        public override AutosaveStruct Read(
+            ref Utf8JsonReader reader,
+            Type typeToConvert,
+            JsonSerializerOptions options) {
+            var autosave = new AutosaveStruct();
+            return autosave;
+        }
+        
+        public override void Write(
+            Utf8JsonWriter writer,
+            AutosaveStruct autosave,
+            JsonSerializerOptions options) {
+            writer.WriteStartObject();
+            if (autosave.Storage != null) {
+                var storageconv = new MemVariableStoreConverter();
+                writer.WritePropertyName("Storage");
+                storageconv.Write(writer, autosave.Storage, options);
+            }
+            if (autosave.Dialogue != null) {
+                writer.WritePropertyName("State");
+                autosave.Dialogue.JsonWriteState(writer, options);
+            }
+            writer.WriteEndObject();
+        }
     }
 }
