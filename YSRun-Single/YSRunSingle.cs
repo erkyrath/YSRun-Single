@@ -5,12 +5,14 @@ using System.Text.Json.Serialization;
 
 namespace YSRunSingle
 {
+    #nullable enable
+    
     public class YSRunSingle
     {
         public static int Main(string[] args)
         {
             bool start = false;
-            string gamefile = null;
+            string? gamefile = null;
             
             foreach (var val in args) {
                 if (val == "--start") {
@@ -38,7 +40,7 @@ namespace YSRunSingle
             var settings = new Google.Protobuf.JsonParser.Settings(8);
             var jsonParser = new Google.Protobuf.JsonParser(settings);
 
-            Yarn.CompilerOutput compilerOutput = null;
+            Yarn.CompilerOutput? compilerOutput = null;
             
             using (StreamReader infile = File.OpenText(gamefile)) {
                 compilerOutput = jsonParser.Parse<Yarn.CompilerOutput>(infile);
@@ -115,6 +117,29 @@ namespace YSRunSingle
             Type typeToConvert,
             JsonSerializerOptions options) {
             var autosave = new AutosaveStruct();
+
+            if (reader.TokenType != JsonTokenType.StartObject) {
+                throw new JsonException();
+            }
+            while (reader.Read()) {
+                if (reader.TokenType == JsonTokenType.EndObject) {
+                    break;
+                }
+                if (reader.TokenType != JsonTokenType.PropertyName) {
+                    throw new JsonException();
+                }
+
+                string? propName = reader.GetString();
+                if (propName == "Storage") {
+                    var storageconv = new MemVariableStoreConverter();
+                    autosave.Storage = storageconv.Read(ref reader, typeof(MemVariableStore), options);
+                }
+                else {
+                    throw new JsonException();
+                }
+                
+            }
+            
             return autosave;
         }
         
