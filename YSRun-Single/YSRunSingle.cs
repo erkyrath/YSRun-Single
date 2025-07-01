@@ -122,7 +122,8 @@ namespace YSRunSingle
             
             byte[] bytes = System.Text.Encoding.UTF8.GetBytes(json);
             var reader = new Utf8JsonReader(bytes, joptions);
-
+            
+            reader.Read();
             if (reader.TokenType != JsonTokenType.StartObject) {
                 throw new JsonException();
             }
@@ -140,7 +141,7 @@ namespace YSRunSingle
                 if (propName == "Storage") {
                     var storageconv = new MemVariableStoreConverter();
                     var storage = storageconv.Read(ref reader, typeof(MemVariableStore), options);
-                    //###
+                    dialogue.SetStorage(storage);
                 }
                 else if (propName == "State") {
                     dialogue.JsonReadState(ref reader, options);
