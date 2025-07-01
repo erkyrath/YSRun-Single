@@ -50,6 +50,9 @@ namespace YSRunSingle
             MemVariableStore storage = new MemVariableStore();
             Yarn.Dialogue dialogue = new Yarn.Dialogue(storage);
 
+            dialogue.LogErrorMessage = (val) => Console.Error.WriteLine(val);
+            dialogue.SetProgram(compilerOutput.Program);
+
             if (!startgame) {
                 var joptions = new JsonReaderOptions { };
                 string json = File.ReadAllText("autosave.json");
@@ -65,9 +68,6 @@ namespace YSRunSingle
 
             var awaitinput = false;
             
-            dialogue.LogErrorMessage = (val) => Console.Error.WriteLine(val);
-            dialogue.SetProgram(compilerOutput.Program);
-
             if (startgame) {
                 dialogue.SetNode("Start");
             }
