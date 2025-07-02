@@ -89,7 +89,7 @@ namespace YSRunSingle
 
         // This sets both compilerOutput and dialogue. We will need
         // both.
-        public void ReadGameFile(string gamefile)
+        internal void ReadGameFile(string gamefile)
         {
             var settings = new Google.Protobuf.JsonParser.Settings(8);
             var jsonParser = new Google.Protobuf.JsonParser(settings);
@@ -105,7 +105,7 @@ namespace YSRunSingle
             dialogue.SetProgram(compilerOutput.Program);
         }
 
-        public void RunTurn(JsonDocument input, bool startgame)
+        internal void RunTurn(JsonDocument input, bool startgame)
         {
             if (dialogue == null || compilerOutput == null) {
                 throw new Exception("game not loaded");
@@ -175,12 +175,6 @@ namespace YSRunSingle
                     dialogue.SetSelectedOption(selectedoption);
                 }
 
-                string TextForLine(string lineID, string[] subs)
-                {
-                    string text = compilerOutput.Strings[lineID].Text;
-                    return String.Format(text, subs);
-                }
-
                 void LineHandler(Yarn.Line line)
                 {
                     var text = TextForLine(line.ID, line.Substitutions);
@@ -224,6 +218,12 @@ namespace YSRunSingle
             }
 
             GenerateOutput(dialogue, runstate);
+        }
+
+        internal string TextForLine(string lineID, string[] subs)
+        {
+            string text = compilerOutput!.Strings[lineID].Text;
+            return String.Format(text, subs);
         }
 
         internal void GenerateOutput(Yarn.Dialogue dialogue, RunState runstate)
