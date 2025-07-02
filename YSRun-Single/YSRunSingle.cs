@@ -28,6 +28,7 @@ namespace YSRunSingle
                 return 1;
             }
             try {
+                var input = HandleInput();
                 RunTurn(gamefile, start);
             }
             catch (Exception ex) {
@@ -35,6 +36,40 @@ namespace YSRunSingle
                 return 1;
             }
             return 0;
+        }
+
+        public static JsonDocument HandleInput()
+        {
+            Stream stream = Console.OpenStandardInput();
+            // I'm sure there's an efficient way to do this, but I'm using a List.
+            byte[] bytes = new byte[256];
+            List<byte> buf = new List<byte>();
+            while (true) {
+                int len = stream.Read(bytes, 0, 256);
+                if (len == 0) {
+                    throw new Exception("end of input and not JSON");
+                }
+                int pos = 0;
+                while (pos < len) {
+                    int ix;
+                    for (ix=pos; ix<len; ix++) {
+                        if (bytes[ix] == 10) {
+                            ix++;
+                            break;
+                        }
+                    }
+                    buf.AddRange(bytes[ pos .. ix ]);
+                    pos = ix;
+                    
+                    try {
+                        var obj = JsonDocument.Parse(buf.ToArray());
+                        return obj;
+                    }
+                    catch (JsonException) {
+                        continue;
+                    }
+                }
+            }
         }
 
         public static void RunTurn(string gamefile, bool startgame)
