@@ -102,6 +102,9 @@ namespace YSRunSingle
             dialogue = new Yarn.Dialogue(storage);
 
             dialogue.LogErrorMessage = (val) => Console.Error.WriteLine(val);
+            dialogue.LineHandler = LineHandler;
+            dialogue.OptionsHandler = OptionsHandler;
+            
             dialogue.SetProgram(compilerOutput.Program);
         }
 
@@ -173,25 +176,6 @@ namespace YSRunSingle
                     dialogue.SetSelectedOption(selectedoption);
                 }
 
-                void LineHandler(Yarn.Line line)
-                {
-                    var text = TextForLine(line.ID, line.Substitutions);
-                    runstate.outlines.Add(text);
-                }
-
-                void OptionsHandler(Yarn.OptionSet options)
-                {
-                    foreach (var option in options.Options) {
-                        if (option.IsAvailable) {
-                            var text = TextForLine(option.Line.ID, option.Line.Substitutions);
-                            runstate.outoptions.Add(text);
-                        }
-                    }
-                }
-
-                dialogue.LineHandler = LineHandler;
-                dialogue.OptionsHandler = OptionsHandler;
-
                 do {
                     dialogue.Continue();
                 }
@@ -217,6 +201,23 @@ namespace YSRunSingle
             GenerateOutput(dialogue, runstate);
         }
 
+
+        internal void LineHandler(Yarn.Line line)
+        {
+            var text = TextForLine(line.ID, line.Substitutions);
+            runstate.outlines.Add(text);
+        }
+        
+        internal void OptionsHandler(Yarn.OptionSet options)
+        {
+            foreach (var option in options.Options) {
+                if (option.IsAvailable) {
+                    var text = TextForLine(option.Line.ID, option.Line.Substitutions);
+                    runstate.outoptions.Add(text);
+                }
+            }
+        }
+        
         internal string TextForLine(string lineID, string[] subs)
         {
             string text = compilerOutput!.Strings[lineID].Text;
