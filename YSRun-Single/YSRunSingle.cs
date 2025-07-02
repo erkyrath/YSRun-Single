@@ -128,6 +128,21 @@ namespace YSRunSingle
                 ["type"] = "update",
                 ["gen"] = runstate.gen,
             };
+
+            if (runstate.gen <= 1) {
+                output["windows"] = new JsonArray(
+                    new JsonObject {
+                        ["id"] = 1,
+                        ["type"] = "buffer",
+                        ["rock"] = 0,
+                        ["left"] = 0,
+                        ["top"] = 0,
+                        ["width"] = runstate.metrics_width,
+                        ["height"] = runstate.metrics_height,
+                    }
+                );
+            }
+            
             var contentlines = new JsonArray();
 
             foreach (var text in runstate.outlines) {
@@ -140,6 +155,21 @@ namespace YSRunSingle
                     )
                 };
                 contentlines.Add(dat);
+            }
+
+            int optcount = 0;
+            foreach (var text in runstate.outoptions) {
+                var dat = new JsonObject {
+                    ["content"] = new JsonArray(
+                        new JsonObject {
+                            ["style"] = "note",
+                            ["text"] = text,
+                            ["hyperlink"] = $"{runstate.game_turn}:{optcount}",
+                        }
+                    )
+                };
+                contentlines.Add(dat);
+                optcount++;
             }
 
             if (contentlines.Count > 0) {
