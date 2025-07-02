@@ -39,7 +39,9 @@ namespace YSRunSingle
                 return 1;
             }
 
-            var runner = new YSRunSingle();
+            var runner = new YSRunSingle {
+                autosavepath = Path.Combine(autodir, "autosave.json")
+            };
             
             try {
                 runner.ReadGameFile(gamefile);
@@ -54,6 +56,8 @@ namespace YSRunSingle
             return 0;
         }
 
+        string? autosavepath;
+        
         // The game file data.
         Yarn.CompilerOutput? compilerOutput = null;
 
@@ -145,7 +149,7 @@ namespace YSRunSingle
             // If this isn't the first turn, load the autosave.
             if (!startgame) {
                 var joptions = new JsonReaderOptions { };
-                string json = File.ReadAllText("autosave.json");
+                string json = File.ReadAllText(autosavepath!);
                 runstate.JsonReadAutosave(dialogue, json, joptions);
             }
 
@@ -229,7 +233,7 @@ namespace YSRunSingle
             if (true) {
                 var joptions = new JsonWriterOptions { Indented = false };
                 string json = runstate.JsonWriteAutosave(dialogue, joptions);
-                File.WriteAllText("autosave.json", json+"\n");
+                File.WriteAllText(autosavepath!, json+"\n");
             }
         }
 
