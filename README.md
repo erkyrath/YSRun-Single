@@ -24,7 +24,7 @@ You also have to install the [.NET 6.0 runtime][net6] for some reason known only
 
 [net6]: https://aka.ms/dotnet-core-applaunch?framework=Microsoft.NETCore.App&framework_version=6.0.0
 
-Check out the [YarnSpinner][ysfork] YarnSpinner fork in directory `YarnSpinner` and switch to the `autosave` branch:
+Check out the [YarnSpinner][ysfork] fork in directory `YarnSpinner` and switch to the `autosave` branch:
 
 ```
 git clone git@github.com:erkyrath/YarnSpinner.git
