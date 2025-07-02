@@ -177,7 +177,7 @@ namespace YSRunSingle
                     if (ls.Length == 2) {
                         int valturn, valindex;
                         if (Int32.TryParse(ls[0], out valturn) && Int32.TryParse(ls[1], out valindex)) {
-                            if (valturn == runstate.game_turn && valindex >= 0) {
+                            if (valturn == runstate.game_turn && runstate.OptionIsValid(valindex)) {
                                 runstate.newturn = true;
                                 selectedoption = valindex;
                             }
@@ -195,6 +195,7 @@ namespace YSRunSingle
                     dialogue.SetSelectedOption(selectedoption);
                 }
 
+                // Clear last turn's options.
                 runstate.outoptions.Clear();
 
                 do {
@@ -361,6 +362,15 @@ namespace YSRunSingle
         public string? choicetext = null;
         public List<string> outlines = new List<string>();
         public List<OutOption> outoptions = new List<OutOption>();
+
+        public bool OptionIsValid(int val)
+        {
+            foreach (var opt in outoptions) {
+                if (opt.OptNum == val)
+                    return true;
+            }
+            return false;
+        }
         
         public void JsonReadAutosave(Yarn.Dialogue dialogue, string json, JsonReaderOptions joptions)
         {
