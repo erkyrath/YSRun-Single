@@ -234,7 +234,8 @@ namespace YSRunSingle
             foreach (var option in options.Options) {
                 if (option.IsAvailable) {
                     var text = TextForLine(option.Line.ID, option.Line.Substitutions);
-                    runstate.outoptions.Add( (optnum, text) );
+                    var opt = new OutOption { OptNum=optnum, Text=text };
+                    runstate.outoptions.Add(opt);
                 }
                 optnum++;
             }
@@ -296,13 +297,13 @@ namespace YSRunSingle
                     contentlines.Add(dat);
                 }
     
-                foreach (var (optnum, text) in runstate.outoptions) {
+                foreach (var opt in runstate.outoptions) {
                     var dat = new JsonObject {
                         ["content"] = new JsonArray(
                             new JsonObject {
                                 ["style"] = "note",
-                                ["text"] = text,
-                                ["hyperlink"] = $"{runstate.game_turn}:{optnum}",
+                                ["text"] = opt.Text,
+                                ["hyperlink"] = $"{runstate.game_turn}:{opt.OptNum}",
                             }
                         )
                     };
@@ -337,6 +338,12 @@ namespace YSRunSingle
         }
     }
 
+    internal struct OutOption
+    {
+        public int OptNum { get; set; }
+        public string Text { get; set; }
+    }
+    
     internal struct RunState
     {
         public RunState() {}
@@ -351,7 +358,7 @@ namespace YSRunSingle
         public bool storydone = false;
         public string? choicetext = null;
         public List<string> outlines = new List<string>();
-        public List<(int, string)> outoptions = new List<(int, string)>();
+        public List<OutOption> outoptions = new List<OutOption>();
         
         public void JsonReadAutosave(Yarn.Dialogue dialogue, string json, JsonReaderOptions joptions)
         {
@@ -424,6 +431,13 @@ namespace YSRunSingle
             if (has_metrics) {
                 writer.WriteNumber("MetricsWidth", metrics_width);
                 writer.WriteNumber("MetricsHeight", metrics_height);
+            }
+
+            // Yes, we save outoptions even though the same information
+            // is in vm.currentOptions. It's convenient.
+            if (outoptions.Count > 0) {
+                writer.WritePropertyName("OutOptions");
+                JsonSerializer.Serialize<List<OutOption>>(writer, outoptions, options);
             }
             
             var storageconv = new MemVariableStoreConverter();
