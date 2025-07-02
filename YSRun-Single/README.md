@@ -13,6 +13,14 @@ This script is meant to be used with the [Discoggin][] Discord bot.
 [GlkOteInit]: https://eblong.com/zarf/glk/glkote/docs.html#input
 [dotnet]: https://dotnet.microsoft.com/en-us/download
 
+## To Build
+
+Type:
+
+```
+dotnet build
+```
+
 ## Usage
 
 ```
