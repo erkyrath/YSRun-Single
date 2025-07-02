@@ -27,9 +27,12 @@ namespace YSRunSingle
                 Console.WriteLine("You must supply a game filename");
                 return 1;
             }
+
+            var runner = new YSRunSingle();
+            
             try {
-                var input = ReadStanza();
-                RunTurn(gamefile, input, start);
+                var input = runner.ReadStanza();
+                runner.RunTurn(gamefile, input, start);
             }
             catch (Exception ex) {
                 Console.Error.WriteLine($"{ex.Message}");
@@ -38,7 +41,9 @@ namespace YSRunSingle
             return 0;
         }
 
-        public static JsonDocument ReadStanza()
+        RunState runstate = new RunState();
+
+        public JsonDocument ReadStanza()
         {
             Stream stream = Console.OpenStandardInput();
             // I'm sure there's an efficient way to do this, but I'm using a List.
@@ -72,7 +77,7 @@ namespace YSRunSingle
             }
         }
 
-        public static void RunTurn(string gamefile, JsonDocument input, bool startgame)
+        public void RunTurn(string gamefile, JsonDocument input, bool startgame)
         {
             var settings = new Google.Protobuf.JsonParser.Settings(8);
             var jsonParser = new Google.Protobuf.JsonParser(settings);
@@ -83,7 +88,6 @@ namespace YSRunSingle
                 compilerOutput = jsonParser.Parse<Yarn.CompilerOutput>(infile);
             }
 
-            RunState runstate = new RunState();
             MemVariableStore storage = new MemVariableStore();
             Yarn.Dialogue dialogue = new Yarn.Dialogue(storage);
 
@@ -205,7 +209,7 @@ namespace YSRunSingle
             GenerateOutput(dialogue, runstate);
         }
 
-        internal static void GenerateOutput(Yarn.Dialogue dialogue, RunState runstate)
+        internal void GenerateOutput(Yarn.Dialogue dialogue, RunState runstate)
         {
             var output = new JsonObject {
                 ["type"] = "update",
