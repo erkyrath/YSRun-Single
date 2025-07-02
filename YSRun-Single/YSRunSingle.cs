@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 
 namespace YSRunSingle
@@ -83,16 +85,17 @@ namespace YSRunSingle
 
             void LineHandler(Yarn.Line line)
             {
-                Console.WriteLine(TextForLine(line.ID, line.Substitutions));
+                var text = TextForLine(line.ID, line.Substitutions);
+                runstate.outlines.Add(text);
             }
 
             void OptionsHandler(Yarn.OptionSet options)
             {
-                int count = 0;
                 foreach (var option in options.Options) {
-                    var availstr = option.IsAvailable ? "" : " (unavailable)";
-                    Console.WriteLine($"{count}:{availstr} {TextForLine(option.Line.ID, option.Line.Substitutions)}");
-                    count += 1;
+                    if (option.IsAvailable) {
+                        var text = TextForLine(option.Line.ID, option.Line.Substitutions);
+                        runstate.outoptions.Add(text);
+                    }
                 }
                 awaitinput = true;
             }
@@ -121,13 +124,33 @@ namespace YSRunSingle
 
         internal static void GenerateOutput(Yarn.Dialogue dialogue, RunState runstate)
         {
-            var output = new System.Text.Json.Nodes.JsonObject {
+            var output = new JsonObject {
                 ["type"] = "update",
                 ["gen"] = runstate.gen,
             };
+            var contentlines = new JsonArray();
+
+            foreach (var text in runstate.outlines) {
+                var dat = new JsonObject {
+                    ["content"] = new JsonArray(
+                        new JsonObject {
+                            ["style"] = "normal",
+                            ["text"] = text,
+                        }
+                    )
+                };
+                contentlines.Add(dat);
+            }
+
+            if (contentlines.Count > 0) {
+                output["content"] = new JsonArray(new JsonObject {
+                    ["id"] = 1,
+                    ["text"] = contentlines
+                });
+            }
 
             //### depretty
-            var options = new JsonSerializerOptions { WriteIndented = true };
+            var options = new JsonSerializerOptions { WriteIndented = false };
             Console.WriteLine(output.ToJsonString(options));
         }
     }
@@ -143,6 +166,8 @@ namespace YSRunSingle
         public float metrics_height = 0;
         public bool newinput = false;
         public bool newturn = false;
+        public List<string> outlines = new List<string>();
+        public List<string> outoptions = new List<string>();
         
         public void JsonReadAutosave(Yarn.Dialogue dialogue, string json, JsonReaderOptions joptions)
         {
