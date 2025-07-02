@@ -191,9 +191,11 @@ namespace YSRunSingle
                     var ls = invalue.Split(':');
                     if (ls.Length == 2) {
                         int valturn, valindex;
+                        string? valtext = null;
                         if (Int32.TryParse(ls[0], out valturn) && Int32.TryParse(ls[1], out valindex)) {
-                            if (valturn == runstate.game_turn && runstate.OptionIsValid(valindex)) {
+                            if (valturn == runstate.game_turn && runstate.OptionIsValid(valindex, out valtext)) {
                                 runstate.newturn = true;
+                                runstate.choicetext = valtext;
                                 selectedoption = valindex;
                             }
                         }
@@ -377,12 +379,19 @@ namespace YSRunSingle
         public List<string> outlines = new List<string>();
         public List<OutOption> outoptions = new List<OutOption>();
 
-        public bool OptionIsValid(int val)
+        // Check whether a given option number is a current valid
+        // choice. If so, return its text.
+        // (Option numbers are as passed to SetSelectedOption(). They
+        // start at zero but may not be sequential.
+        public bool OptionIsValid(int val, out string? text)
         {
             foreach (var opt in outoptions) {
-                if (opt.OptNum == val)
+                if (opt.OptNum == val) {
+                    text = opt.Text;
                     return true;
+                }
             }
+            text = null;
             return false;
         }
         
