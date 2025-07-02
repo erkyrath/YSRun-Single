@@ -216,8 +216,7 @@ namespace YSRunSingle
             // We always autosave at the end of the turn. (Even if the engine
             // was not cranked, we need to save the new runstate.gen.)
             if (true) {
-                //### depretty
-                var joptions = new JsonWriterOptions { Indented = true };
+                var joptions = new JsonWriterOptions { Indented = false };
                 string json = runstate.JsonWriteAutosave(dialogue, joptions);
                 File.WriteAllText("autosave.json", json+"\n");
             }
