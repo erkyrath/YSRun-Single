@@ -230,11 +230,13 @@ namespace YSRunSingle
         // Dialogue options presentation handler.
         internal void OptionsHandler(Yarn.OptionSet options)
         {
+            int optnum = 0;
             foreach (var option in options.Options) {
                 if (option.IsAvailable) {
                     var text = TextForLine(option.Line.ID, option.Line.Substitutions);
-                    runstate.outoptions.Add(text);
+                    runstate.outoptions.Add( (optnum, text) );
                 }
+                optnum++;
             }
         }
 
@@ -294,19 +296,17 @@ namespace YSRunSingle
                     contentlines.Add(dat);
                 }
     
-                int optcount = 0;
-                foreach (var text in runstate.outoptions) {
+                foreach (var (optnum, text) in runstate.outoptions) {
                     var dat = new JsonObject {
                         ["content"] = new JsonArray(
                             new JsonObject {
                                 ["style"] = "note",
                                 ["text"] = text,
-                                ["hyperlink"] = $"{runstate.game_turn}:{optcount}",
+                                ["hyperlink"] = $"{runstate.game_turn}:{optnum}",
                             }
                         )
                     };
                     contentlines.Add(dat);
-                    optcount++;
                 }
 
             }
@@ -351,7 +351,7 @@ namespace YSRunSingle
         public bool storydone = false;
         public string? choicetext = null;
         public List<string> outlines = new List<string>();
-        public List<string> outoptions = new List<string>();
+        public List<(int, string)> outoptions = new List<(int, string)>();
         
         public void JsonReadAutosave(Yarn.Dialogue dialogue, string json, JsonReaderOptions joptions)
         {
