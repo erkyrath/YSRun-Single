@@ -143,51 +143,54 @@ namespace YSRunSingle
                 }
             }
 
-            var awaitinput = false;
+            // We only crank the engine if we have a valid choice. (Or if the game is being inited.)
+            if (startgame || selectedoption >= 0) {
+                var awaitinput = false;
             
-            if (startgame) {
-                dialogue.SetNode("Start");
-            }
-            else {
-                //###
-                dialogue.SetSelectedOption(selectedoption);
-            }
-
-            string TextForLine(string lineID, string[] subs)
-            {
-                string text = compilerOutput.Strings[lineID].Text;
-                return String.Format(text, subs);
-            }
-
-            void LineHandler(Yarn.Line line)
-            {
-                var text = TextForLine(line.ID, line.Substitutions);
-                runstate.outlines.Add(text);
-            }
-
-            void OptionsHandler(Yarn.OptionSet options)
-            {
-                foreach (var option in options.Options) {
-                    if (option.IsAvailable) {
-                        var text = TextForLine(option.Line.ID, option.Line.Substitutions);
-                        runstate.outoptions.Add(text);
-                    }
+                if (startgame) {
+                    dialogue.SetNode("Start");
                 }
-                awaitinput = true;
+                else {
+                    //###
+                    dialogue.SetSelectedOption(selectedoption);
+                }
+
+                string TextForLine(string lineID, string[] subs)
+                {
+                    string text = compilerOutput.Strings[lineID].Text;
+                    return String.Format(text, subs);
+                }
+
+                void LineHandler(Yarn.Line line)
+                {
+                    var text = TextForLine(line.ID, line.Substitutions);
+                    runstate.outlines.Add(text);
+                }
+
+                void OptionsHandler(Yarn.OptionSet options)
+                {
+                    foreach (var option in options.Options) {
+                        if (option.IsAvailable) {
+                            var text = TextForLine(option.Line.ID, option.Line.Substitutions);
+                            runstate.outoptions.Add(text);
+                        }
+                    }
+                    awaitinput = true;
+                }
+
+                dialogue.LineHandler = LineHandler;
+                dialogue.OptionsHandler = OptionsHandler;
+
+                do {
+                    dialogue.Continue();
+                }
+                while (dialogue.IsActive && !awaitinput);
+
+                if (!awaitinput || runstate.outoptions.Count == 0) {
+                    runstate.storydone = true;
+                }
             }
-
-            dialogue.LineHandler = LineHandler;
-            dialogue.OptionsHandler = OptionsHandler;
-
-            do {
-                dialogue.Continue();
-            }
-            while (dialogue.IsActive && !awaitinput);
-
-            if (!awaitinput || runstate.outoptions.Count == 0) {
-                runstate.storydone = true;
-            }
-
+            
             runstate.gen++;
             if (runstate.newturn) {
                 runstate.game_turn++;
