@@ -178,6 +178,16 @@ namespace YSRunSingle
 
             }
 
+            if (runstate.newinput) {
+                if (runstate.outoptions.Count > 0) {
+                    output["input"] = new JsonArray(new JsonObject {
+                        ["id"] = 1,
+                        ["gen"] = 0,
+                        ["hyperlink"] = true,
+                    });
+                }
+            }
+
             if (contentlines.Count > 0) {
                 output["content"] = new JsonArray(new JsonObject {
                     ["id"] = 1,
