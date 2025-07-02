@@ -210,6 +210,8 @@ namespace YSRunSingle
                 runstate.game_turn++;
             }
 
+            // We always autosave at the end of the turn. (Even if the engine
+            // was not cranked, we need to save the new runstate.gen.)
             if (true) {
                 //### depretty
                 var joptions = new JsonWriterOptions { Indented = true };
