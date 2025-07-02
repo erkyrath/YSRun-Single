@@ -18,9 +18,24 @@ This script is meant to be used with the [Discoggin][] Discord bot.
 
 ## To Build
 
-Check out the [YarnSpinner][ysfork] YarnSpinner fork in directory `YarnSpinner` and switch to the `autosave` branch.
+Install the current version of [.NET][dotnet] if necessary. (That's 9.0 at the time of this writing.)
 
-Then type:
+You also have to install the [.NET 6.0 runtime][net6] for some reason known only to Microsoft.
+
+[net6]: https://aka.ms/dotnet-core-applaunch?framework=Microsoft.NETCore.App&framework_version=6.0.0
+
+Check out the [YarnSpinner][ysfork] YarnSpinner fork in directory `YarnSpinner` and switch to the `autosave` branch:
+
+```
+git clone git@github.com:erkyrath/YarnSpinner.git
+cd YarnSpinner
+git checkout autosave
+cd ..
+```
+
+(The top level of the respository should now have both `YSRun-Single` and `YarnSpinner` directories. Sorry, it's a confusing arrangement.)
+
+Now you can build the .NET application:
 
 ```
 cd YSRun-Single
