@@ -166,8 +166,6 @@ namespace YSRunSingle
 
             // We only crank the engine if we have a valid choice. (Or if the game is being inited.)
             if (startgame || selectedoption >= 0) {
-                var awaitinput = false;
-            
                 if (startgame) {
                     dialogue.SetNode("Start");
                 }
@@ -189,7 +187,6 @@ namespace YSRunSingle
                             runstate.outoptions.Add(text);
                         }
                     }
-                    awaitinput = true;
                 }
 
                 dialogue.LineHandler = LineHandler;
@@ -198,9 +195,9 @@ namespace YSRunSingle
                 do {
                     dialogue.Continue();
                 }
-                while (dialogue.IsActive && !awaitinput);
+                while (dialogue.IsActive && !dialogue.IsAwaitingOptions);
 
-                if (!awaitinput || runstate.outoptions.Count == 0) {
+                if (!dialogue.IsAwaitingOptions || runstate.outoptions.Count == 0) {
                     runstate.storydone = true;
                 }
             }
