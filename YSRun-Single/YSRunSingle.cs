@@ -15,10 +15,21 @@ namespace YSRunSingle
         {
             bool start = false;
             string? gamefile = null;
-            
-            foreach (var val in args) {
+            string autodir = ".";
+
+            for (int ix=0; ix<args.Length; ix++) {
+                var val = args[ix];
+                if (val == "--help") {
+                    Console.WriteLine("usage: ysrun [ --start ] [ --autodir DIR ] GAME.yarn.json");
+                    return 1;
+                }
                 if (val == "--start") {
                     start = true;
+                    continue;
+                }
+                if (val == "--autodir") {
+                    ix++;
+                    autodir = args[ix];
                     continue;
                 }
                 gamefile = val;
