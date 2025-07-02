@@ -31,8 +31,9 @@ namespace YSRunSingle
             var runner = new YSRunSingle();
             
             try {
+                runner.ReadGameFile(gamefile);
                 var input = runner.ReadStanza();
-                runner.RunTurn(gamefile, input, start);
+                runner.RunTurn(input, start);
             }
             catch (Exception ex) {
                 Console.Error.WriteLine($"{ex.Message}");
@@ -44,6 +45,9 @@ namespace YSRunSingle
         // The game file data.
         Yarn.CompilerOutput? compilerOutput = null;
 
+        // The Yarn dialogue structure.
+        Yarn.Dialogue? dialogue = null;
+        
         // Execution state for our turn. (The boundary between YSRunner and
         // RunState is a bit fuzzy; this was originally modelled on the
         // Ink runner, which is Javascript.)
@@ -83,7 +87,9 @@ namespace YSRunSingle
             }
         }
 
-        public void RunTurn(string gamefile, JsonDocument input, bool startgame)
+        // This sets both compilerOutput and dialogue. We will need
+        // both.
+        public void ReadGameFile(string gamefile)
         {
             var settings = new Google.Protobuf.JsonParser.Settings(8);
             var jsonParser = new Google.Protobuf.JsonParser(settings);
@@ -93,11 +99,18 @@ namespace YSRunSingle
             }
 
             MemVariableStore storage = new MemVariableStore();
-            Yarn.Dialogue dialogue = new Yarn.Dialogue(storage);
+            dialogue = new Yarn.Dialogue(storage);
 
             dialogue.LogErrorMessage = (val) => Console.Error.WriteLine(val);
             dialogue.SetProgram(compilerOutput.Program);
+        }
 
+        public void RunTurn(JsonDocument input, bool startgame)
+        {
+            if (dialogue == null || compilerOutput == null) {
+                throw new Exception("game not loaded");
+            }
+            
             if (!startgame) {
                 var joptions = new JsonReaderOptions { };
                 string json = File.ReadAllText("autosave.json");
