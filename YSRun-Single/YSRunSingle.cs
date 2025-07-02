@@ -41,6 +41,12 @@ namespace YSRunSingle
             return 0;
         }
 
+        // The game file data.
+        Yarn.CompilerOutput? compilerOutput = null;
+
+        // Execution state for our turn. (The boundary between YSRunner and
+        // RunState is a bit fuzzy; this was originally modelled on the
+        // Ink runner, which is Javascript.)
         RunState runstate = new RunState();
 
         public JsonDocument ReadStanza()
@@ -82,8 +88,6 @@ namespace YSRunSingle
             var settings = new Google.Protobuf.JsonParser.Settings(8);
             var jsonParser = new Google.Protobuf.JsonParser(settings);
 
-            Yarn.CompilerOutput? compilerOutput = null;
-            
             using (StreamReader infile = File.OpenText(gamefile)) {
                 compilerOutput = jsonParser.Parse<Yarn.CompilerOutput>(infile);
             }
