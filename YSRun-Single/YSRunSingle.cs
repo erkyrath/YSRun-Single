@@ -59,14 +59,17 @@ namespace YSRunSingle
                 var joptions = new JsonReaderOptions { };
                 string json = File.ReadAllText("autosave.json");
                 runstate.JsonReadAutosave(dialogue, json, joptions);
-                //###
-                if (true) {
-                    var jwoptions = new JsonWriterOptions { Indented = true };
-                    string json2 = runstate.JsonWriteAutosave(dialogue, jwoptions);
-                    File.WriteAllText("autosave-copy.json", json2+"\n");
-                }
-                //###
             }
+
+            //###
+            if (startgame) {
+                runstate.newturn = true;
+                runstate.newinput = true;
+                runstate.metrics_width = 80;
+                runstate.metrics_height = 24;
+                runstate.has_metrics = true;
+            }
+            //###
 
             var awaitinput = false;
             
@@ -145,31 +148,34 @@ namespace YSRunSingle
             
             var contentlines = new JsonArray();
 
-            foreach (var text in runstate.outlines) {
-                var dat = new JsonObject {
-                    ["content"] = new JsonArray(
-                        new JsonObject {
-                            ["style"] = "normal",
-                            ["text"] = text,
-                        }
-                    )
-                };
-                contentlines.Add(dat);
-            }
+            if (runstate.newturn) {
+                foreach (var text in runstate.outlines) {
+                    var dat = new JsonObject {
+                        ["content"] = new JsonArray(
+                            new JsonObject {
+                                ["style"] = "normal",
+                                ["text"] = text,
+                            }
+                        )
+                    };
+                    contentlines.Add(dat);
+                }
+    
+                int optcount = 0;
+                foreach (var text in runstate.outoptions) {
+                    var dat = new JsonObject {
+                        ["content"] = new JsonArray(
+                            new JsonObject {
+                                ["style"] = "note",
+                                ["text"] = text,
+                                ["hyperlink"] = $"{runstate.game_turn}:{optcount}",
+                            }
+                        )
+                    };
+                    contentlines.Add(dat);
+                    optcount++;
+                }
 
-            int optcount = 0;
-            foreach (var text in runstate.outoptions) {
-                var dat = new JsonObject {
-                    ["content"] = new JsonArray(
-                        new JsonObject {
-                            ["style"] = "note",
-                            ["text"] = text,
-                            ["hyperlink"] = $"{runstate.game_turn}:{optcount}",
-                        }
-                    )
-                };
-                contentlines.Add(dat);
-                optcount++;
             }
 
             if (contentlines.Count > 0) {
