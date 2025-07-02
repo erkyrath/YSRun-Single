@@ -342,7 +342,7 @@ namespace YSRunSingle
                     metrics_width = reader.GetSingle();
                     has_metrics = true;
                 }
-                else if (propName == "Metricsheight") {
+                else if (propName == "MetricsHeight") {
                     metrics_height = reader.GetSingle();
                     has_metrics = true;
                 }
