@@ -2,11 +2,14 @@
 
 This is a C# ([.NET][dotnet]) program which starts a YarnSpinner game, executes one turn, and exits. The input and output are JSON stanzas in the [GlkOte][] format.
 
+To run a Yarn game, it must be in the "machine-readable" JSON format produced by `ysc --stdout`. See [YarnSpinner-Console][ysconsole].
+
 The program relies on a modified version of the C# [YarnSpinner][] library. (The modifications have to do with serializing the library state in mid-dialogue.) At present this exists as a [fork][ysfork] on Github.
 
 This script is meant to be used with the [Discoggin][] Discord bot.
 
 [YarnSpinner]: https://github.com/YarnSpinnerTool/YarnSpinner
+[ysconsole]: https://github.com/YarnSpinnerTool/YarnSpinner-Console
 [ysfork]: https://github.com/erkyrath/YarnSpinner/tree/autosave
 [Discoggin]: https://github.com/iftechfoundation/discoggin
 [GlkOte]: https://eblong.com/zarf/glk/glkote/docs.html
