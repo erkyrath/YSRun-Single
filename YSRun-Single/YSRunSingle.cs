@@ -151,7 +151,6 @@ namespace YSRunSingle
                     dialogue.SetNode("Start");
                 }
                 else {
-                    //###
                     dialogue.SetSelectedOption(selectedoption);
                 }
 
