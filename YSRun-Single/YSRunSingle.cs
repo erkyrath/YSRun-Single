@@ -28,7 +28,7 @@ namespace YSRunSingle
                 return 1;
             }
             try {
-                var input = HandleInput();
+                var input = ReadStanza();
                 RunTurn(gamefile, input, start);
             }
             catch (Exception ex) {
@@ -38,7 +38,7 @@ namespace YSRunSingle
             return 0;
         }
 
-        public static JsonDocument HandleInput()
+        public static JsonDocument ReadStanza()
         {
             Stream stream = Console.OpenStandardInput();
             // I'm sure there's an efficient way to do this, but I'm using a List.
