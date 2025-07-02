@@ -15,9 +15,12 @@ This script is meant to be used with the [Discoggin][] Discord bot.
 
 ## To Build
 
-Type:
+Check out the [YarnSpinner][ysfork] YarnSpinner fork in directory `YarnSpinner` and switch to the `autosave` branch.
+
+Then type:
 
 ```
+cd YSRun-Single
 dotnet build
 ```
 
