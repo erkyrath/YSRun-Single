@@ -149,6 +149,18 @@ namespace YSRunSingle
             var contentlines = new JsonArray();
 
             if (runstate.newturn) {
+                if (runstate.choicetext != null) {
+                    var dat = new JsonObject {
+                        ["content"] = new JsonArray(
+                            new JsonObject {
+                                ["style"] = "input",
+                                ["text"] = runstate.choicetext,
+                            }
+                        )
+                    };
+                    contentlines.Add(dat);
+                }
+                
                 foreach (var text in runstate.outlines) {
                     var dat = new JsonObject {
                         ["content"] = new JsonArray(
@@ -216,6 +228,7 @@ namespace YSRunSingle
         public bool newinput = false;
         public bool newturn = false;
         public bool storydone = false;
+        public string? choicetext = null;
         public List<string> outlines = new List<string>();
         public List<string> outoptions = new List<string>();
         
