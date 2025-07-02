@@ -195,6 +195,8 @@ namespace YSRunSingle
                     dialogue.SetSelectedOption(selectedoption);
                 }
 
+                runstate.outoptions.Clear();
+
                 do {
                     dialogue.Continue();
                 }
@@ -395,6 +397,11 @@ namespace YSRunSingle
                 else if (propName == "MetricsHeight") {
                     metrics_height = reader.GetSingle();
                     has_metrics = true;
+                }
+                else if (propName == "OutOptions") {
+                    var ls = JsonSerializer.Deserialize<List<OutOption>>(ref reader, options);
+                    if (ls != null)
+                        outoptions = ls;
                 }
                 else if (propName == "Storage") {
                     var storageconv = new MemVariableStoreConverter();
