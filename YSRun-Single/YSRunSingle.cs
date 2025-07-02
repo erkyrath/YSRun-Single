@@ -130,7 +130,8 @@ namespace YSRunSingle
             if (dialogue == null || compilerOutput == null) {
                 throw new Exception("game not loaded");
             }
-            
+
+            // If this isn't the first turn, load the autosave.
             if (!startgame) {
                 var joptions = new JsonReaderOptions { };
                 string json = File.ReadAllText("autosave.json");
@@ -139,7 +140,8 @@ namespace YSRunSingle
 
             int selectedoption = -1;
 
-            if (!runstate.has_metrics) {
+            // Deal with the input object.
+            if (startgame) {
                 JsonElement metricsel;
                 if (!input.RootElement.TryGetProperty("metrics", out metricsel)) {
                     throw new Exception("first input had no metrics");
