@@ -34,6 +34,7 @@ namespace YSRunSingle
                 runner.ReadGameFile(gamefile);
                 var input = runner.ReadStanza();
                 runner.RunTurn(input, start);
+                runner.GenerateOutput();
             }
             catch (Exception ex) {
                 Console.Error.WriteLine($"{ex.Message}");
@@ -213,8 +214,6 @@ namespace YSRunSingle
                 string json = runstate.JsonWriteAutosave(dialogue, joptions);
                 File.WriteAllText("autosave.json", json+"\n");
             }
-
-            GenerateOutput();
         }
 
         // Dialogue line output handler.
