@@ -108,8 +108,8 @@ namespace YSRunSingle
             }
             while (dialogue.IsActive && !awaitinput);
 
-            if (!awaitinput) {
-                //###
+            if (!awaitinput || runstate.outoptions.Count == 0) {
+                runstate.storydone = true;
             }
 
             if (true) {
@@ -149,7 +149,10 @@ namespace YSRunSingle
                 });
             }
 
-            //### depretty
+            if (runstate.storydone) {
+                output["exit"] = true;
+            }
+
             var options = new JsonSerializerOptions { WriteIndented = false };
             Console.WriteLine(output.ToJsonString(options));
         }
@@ -166,6 +169,7 @@ namespace YSRunSingle
         public float metrics_height = 0;
         public bool newinput = false;
         public bool newturn = false;
+        public bool storydone = false;
         public List<string> outlines = new List<string>();
         public List<string> outoptions = new List<string>();
         
