@@ -53,6 +53,14 @@ namespace YSRunSingle
         // Ink runner, which is Javascript.)
         RunState runstate = new RunState();
 
+        // Read one JSON stanza from stdin. The stanza must be terminated
+        // by a newline, but it doesn't have to arrive all one one line.
+        //
+        // This is pretty bad at detecting non-JSON input. If the input
+        // is garbage, it will keep reading forever hoping that the
+        // next line will make it valid. Of course if the first line
+        // doesn't start with "{", it will never be valid, but we don't
+        // detect that case.
         public JsonDocument ReadStanza()
         {
             Stream stream = Console.OpenStandardInput();
@@ -87,6 +95,8 @@ namespace YSRunSingle
             }
         }
 
+        // Read the game file data from a JSON ("machine-readable")
+        // file.
         // This sets both compilerOutput and dialogue. We will need
         // both.
         internal void ReadGameFile(string gamefile)
@@ -108,6 +118,12 @@ namespace YSRunSingle
             dialogue.SetProgram(compilerOutput.Program);
         }
 
+        // Perform the turn.
+        // If startgame is true, the input must be a GlkOte init
+        // object. We will run the game up to the first choice.
+        // If startgame is false, the input must be a GlkOte hyperlink
+        // event. We will accept that choice and run the game to the
+        // next choice.
         internal void RunTurn(JsonDocument input, bool startgame)
         {
             if (dialogue == null || compilerOutput == null) {
@@ -198,16 +214,17 @@ namespace YSRunSingle
                 File.WriteAllText("autosave.json", json+"\n");
             }
 
-            GenerateOutput(dialogue, runstate);
+            GenerateOutput();
         }
 
-
+        // Dialogue line output handler.
         internal void LineHandler(Yarn.Line line)
         {
             var text = TextForLine(line.ID, line.Substitutions);
             runstate.outlines.Add(text);
         }
-        
+
+        // Dialogue options presentation handler.
         internal void OptionsHandler(Yarn.OptionSet options)
         {
             foreach (var option in options.Options) {
@@ -217,14 +234,16 @@ namespace YSRunSingle
                 }
             }
         }
-        
+
+        // Figure out the substituted text for a Yarn line.
         internal string TextForLine(string lineID, string[] subs)
         {
             string text = compilerOutput!.Strings[lineID].Text;
             return String.Format(text, subs);
         }
 
-        internal void GenerateOutput(Yarn.Dialogue dialogue, RunState runstate)
+        // Generate the GlkOte output of our turn.
+        internal void GenerateOutput()
         {
             var output = new JsonObject {
                 ["type"] = "update",
