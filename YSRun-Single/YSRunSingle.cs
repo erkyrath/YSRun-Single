@@ -29,7 +29,7 @@ namespace YSRunSingle
             }
             try {
                 var input = HandleInput();
-                RunTurn(gamefile, start);
+                RunTurn(gamefile, input, start);
             }
             catch (Exception ex) {
                 Console.Error.WriteLine($"{ex.Message}");
@@ -72,7 +72,7 @@ namespace YSRunSingle
             }
         }
 
-        public static void RunTurn(string gamefile, bool startgame)
+        public static void RunTurn(string gamefile, JsonDocument input, bool startgame)
         {
             var settings = new Google.Protobuf.JsonParser.Settings(8);
             var jsonParser = new Google.Protobuf.JsonParser(settings);
@@ -96,15 +96,52 @@ namespace YSRunSingle
                 runstate.JsonReadAutosave(dialogue, json, joptions);
             }
 
-            //###
-            if (startgame) {
-                runstate.newturn = true;
-                runstate.newinput = true;
-                runstate.metrics_width = 80;
-                runstate.metrics_height = 24;
+            int selectedoption = -1;
+
+            if (!runstate.has_metrics) {
+                JsonElement metricsel;
+                if (!input.RootElement.TryGetProperty("metrics", out metricsel)) {
+                    throw new Exception("first input had no metrics");
+                }
+                JsonElement el;
+                if (metricsel.TryGetProperty("width", out el)) {
+                    runstate.metrics_width = el.GetSingle();
+                }
+                if (metricsel.TryGetProperty("height", out el)) {
+                    runstate.metrics_height = el.GetSingle();
+                }
                 runstate.has_metrics = true;
+                runstate.newinput = true;
+                runstate.newturn = true;
             }
-            //###
+            else {
+                string? intype = null;
+                string? invalue = null;
+                int inwin = 0;
+                JsonElement el;
+                if (input.RootElement.TryGetProperty("type", out el)) {
+                    intype = el.GetString();
+                }
+                if (input.RootElement.TryGetProperty("window", out el)) {
+                    inwin = el.GetInt32();
+                }
+                if (input.RootElement.TryGetProperty("value", out el)) {
+                    invalue = el.GetString();
+                }
+                if (intype == "hyperlink" && inwin == 1 && invalue != null) {
+                    runstate.newinput = true;
+                    var ls = invalue.Split(':');
+                    if (ls.Length == 2) {
+                        int valturn, valindex;
+                        if (Int32.TryParse(ls[0], out valturn) && Int32.TryParse(ls[1], out valindex)) {
+                            if (valturn == runstate.game_turn && valindex >= 0) {
+                                runstate.newturn = true;
+                                selectedoption = valindex;
+                            }
+                        }
+                    }
+                }
+            }
 
             var awaitinput = false;
             
@@ -112,7 +149,8 @@ namespace YSRunSingle
                 dialogue.SetNode("Start");
             }
             else {
-                dialogue.SetSelectedOption(0); //###
+                //###
+                dialogue.SetSelectedOption(selectedoption);
             }
 
             string TextForLine(string lineID, string[] subs)
@@ -148,6 +186,11 @@ namespace YSRunSingle
 
             if (!awaitinput || runstate.outoptions.Count == 0) {
                 runstate.storydone = true;
+            }
+
+            runstate.gen++;
+            if (runstate.newturn) {
+                runstate.game_turn++;
             }
 
             if (true) {
